@@ -1,0 +1,42 @@
+# 🚀 LLM API com FastAPI + Docker
+
+Este projeto é uma API simples utilizando **FastAPI** para rodar um modelo de linguagem (LLM) localmente usando `llama-cpp-python`.
+
+---
+
+## 📦 Tecnologias utilizadas
+
+- Python 3.10
+- FastAPI
+- Uvicorn
+- llama-cpp-python
+- Docker
+
+---
+
+---
+
+## ⚙️ Como funciona
+
+A API recebe um prompt via POST e retorna:
+
+- resposta do modelo
+- tempo total de execução
+
+---
+
+## 🐳 Build da imagem Docker
+
+Dentro da pasta do projeto, execute:
+
+```bash
+docker build -t llm-api .
+
+
+## Executar o container
+
+docker run -p 8000:8000 \
+  -v $(pwd)/models:/app/models \
+  llm-api
+
+

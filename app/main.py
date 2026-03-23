@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from llama_cpp import Llama
 import os, time
@@ -9,7 +9,9 @@ app = FastAPI()
 # Carrega modelo
 llm = Llama(
     # model_path="models/TinyLlama-1.1B-Chat-v1.0-Q4_K_M.gguf",
-     model_path="models/mistral-7b-instruct-v0.1.Q4_0.gguf",
+    #  model_path="models/mistral-7b-instruct-v0.1.Q4_0.gguf",
+     model_path="models/meta-llama-Llama-3.1-8B-Instruct-Q2_K.gguf",
+     
     n_ctx=1024,
     n_threads=os.cpu_count()
 )
@@ -19,25 +21,26 @@ class Request(BaseModel):
 
 @app.post("/chat")
 def chat(req: Request):
+    try:
+        start = time.time()
 
-    start = time.time()
+        output = llm(
+            prompt = f"""
+                    Você é um assistente de IA
+                    Responda sempre de forma clara d direta.
+                
+                    {req.prompt}
+                """,
+            max_tokens=150,
+            temperature=0.7
+        )
+        
+        end = time.time()
 
-    output = llm(
-        prompt = f"""
-            <s>[INST]
-                You are a helpful AI assistant.
-                Always respond clearly and directly.
-            
-                {req.prompt}
-            [/INST]
-            """,
-        max_tokens=150,
-        temperature=0.7
-    )
-    
-    end = time.time()
-
-    return {
-        "response": output["choices"][0]["text"],
-        "total_time": end - start
-    }
+        return {
+            "response": output["choices"][0]["text"],
+            "total_time": end - start,
+            "model": llm.model_path
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao processar a requisição {str(e)}")
